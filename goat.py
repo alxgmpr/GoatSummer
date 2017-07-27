@@ -106,8 +106,10 @@ class Goat:
             )
             if r.status_code == 200:
                 print 'successfully submitted {}'.format(pid)
+                return True
             else:
                 print 'got bad status code {} from share'.format(r.status_code)
+                return False
         except requests.exceptions.Timeout:
             print 'timeout from product share {}'.format(pid)
             return False
@@ -120,12 +122,15 @@ if g.login(GOATUSER, GOATPASS):
     for p in g.products:
         if not g.share_product(p, 'twitter'):
             exit(-1)
-        sleep(randrange(3, 5))
-        if not g.share_product(p, 'facebook'):
-            exit(-1)
-        sleep(randrange(3, 5))
-        if not g.share_product(p, 'instagram'):
-            exit(-1)
-        sleep(randrange(3, 5))
+        else:
+            sleep(randrange(3, 5))
+            if not g.share_product(p, 'facebook'):
+                exit(-1)
+            else:
+                sleep(randrange(3, 5))
+                if not g.share_product(p, 'instagram'):
+                    exit(-1)
+                else:
+                    sleep(randrange(3, 5))
 print '='*50
 print 'time to run: {} sec'.format(abs(g.start-time()))
