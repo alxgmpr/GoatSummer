@@ -9,7 +9,7 @@ from time import sleep, time
 
 GOATUSER = 'email@hotmail.com'  # GOAT email here
 GOATPASS = 'pa55w0rd'  # GOAT password here
-INDEX = 0 # start from base?
+INDEX = 0  # start from base?
 
 
 class Goat:
