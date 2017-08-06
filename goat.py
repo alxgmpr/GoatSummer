@@ -7,8 +7,9 @@ import requests
 from time import sleep, time
 
 
-GOATUSER = 'fake@gmail.com'  # GOAT email here
-GOATPASS = 'password123'  # GOAT password here
+GOATUSER = 'email@hotmail.com'  # GOAT email here
+GOATPASS = 'pa55w0rd'  # GOAT password here
+INDEX = 0 # start from base?
 
 
 class Goat:
@@ -119,18 +120,32 @@ if g.login(GOATUSER, GOATPASS):
     for i in range(0, 16):
         g.get_products(i)
         print '='*50
+        print g.products
+        print '='*50
+    i = 0
+    flag = True
     for p in g.products:
-        if not g.share_product(p, 'twitter'):
-            exit(-1)
+        if flag:
+            if INDEX != 0:
+                i += 1
+                if INDEX == i:
+                    flag = False
         else:
-            sleep(randrange(3, 5))
-            if not g.share_product(p, 'facebook'):
+            if not g.share_product(p, 'twitter'):
+                print 'DIED ON INDEX: {}'.format(i)
                 exit(-1)
             else:
                 sleep(randrange(3, 5))
-                if not g.share_product(p, 'instagram'):
+                if not g.share_product(p, 'facebook'):
+                    print 'DIED ON INDEX: {}'.format(i)
                     exit(-1)
                 else:
                     sleep(randrange(3, 5))
+                    if not g.share_product(p, 'instagram'):
+                        print 'DIED ON INDEX: {}'.format(i)
+                        exit(-1)
+                    else:
+                        sleep(randrange(3, 5))
+            i += 1
 print '='*50
 print 'time to run: {} sec'.format(abs(g.start-time()))
