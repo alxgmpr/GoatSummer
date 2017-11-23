@@ -5,24 +5,22 @@ from random import randrange
 
 import requests
 from time import sleep, time
-
-
-GOATUSER = 'email@hotmail.com'  # GOAT email here
-GOATPASS = 'pa55w0rd'  # GOAT password here
-INDEX = 0  # start from base?
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class Goat:
     def __init__(self):
         self.start = time()
         self.s = requests.Session()
+        self.s.verify = False
         self.headers = {
             'Host': 'www.goat.com',
             'Accept-Encoding': 'gzip,deflate',
             'Connection': 'keep-alive',
             'Accept': '*/*',
             'Accept-Language': 'en-US;q=1',
-            'User-Agent': 'GOAT/1.11 (iPhone; iOS 10.3.2; Scale/2.00)',
+            'User-Agent': 'GOAT/1.13.1 (iPhone; iOS 10.3.3; Scale/2.00)',
             'Content-Type': 'application/x-www-form-urlencoded'
         }
         self.auth_token = ''
@@ -31,7 +29,9 @@ class Goat:
         print '\n #GOATSUMMER ENTRY JIG \n BY @EDZART/@573SUPREME \n http://github.com/alxgmpr/goatsummer \n'
         print '='*50
 
-    def login(self, username, password):
+    def login(self):
+        username = raw_input('Enter email > ')
+        password = raw_input('Enter password > ')
         url = 'https://www.goat.com/api/v1/users/sign_in'
         data = {
             'user[login]': username,
@@ -52,7 +52,6 @@ class Goat:
                     self.auth_token = r['authToken']
                     print 'using auth token {}'.format(self.auth_token)
                     self.headers['Authorization'] = 'Token token="{}"'.format(self.auth_token)
-                    return True
                 except KeyError:
                     print 'couldnt find auth token'
                     return False
@@ -64,8 +63,22 @@ class Goat:
             print 'timeout from login request'
             return False
 
+        print 'getting /me'
+        r = self.s.get(
+            'https://www.goat.com/api/v1/users/me',
+            headers=self.headers
+        )
+        r.raise_for_status()
+        print 'getting /allstrings'
+        r = self.s.get(
+            'https://www.goat.com/api/v1/allstrings',
+            headers=self.headers
+        )
+        r.raise_for_status()
+        return True
+
     def get_products(self, page):
-        url = 'https://www.goat.com/api/v1/contests/2?page={}'.format(page)
+        url = 'https://www.goat.com/api/v1/contests/3?page={}'.format(page)
         try:
             print 'scraping up product template ids (page {})'.format(page)
             r = self.s.get(
@@ -86,13 +99,13 @@ class Goat:
                     return False
             else:
                 print 'got bad status code {} from pid scrape'.format(r.status_code)
-                return False
+                exit(-1)
         except requests.exceptions.Timeout:
             print 'timeout from product scrape'
             return False
 
     def share_product(self, pid, network):
-        url = 'https://www.goat.com/api/v1/contests/2/shared'
+        url = 'https://www.goat.com/api/v1/contests/3/shared'
         data = {
             'productTemplateId': pid,
             'socialMediaType': network
@@ -115,37 +128,33 @@ class Goat:
             print 'timeout from product share {}'.format(pid)
             return False
 g = Goat()
-if g.login(GOATUSER, GOATPASS):
+if g.login():
     print '='*50
-    for i in range(0, 16):
+    for i in range(1, 16):
         g.get_products(i)
         print '='*50
         print g.products
         print '='*50
     i = 0
-    flag = True
+    # for p in g.products:
+    #     print '\'{}\','.format(p)
+    # exit(0)
     for p in g.products:
-        if flag:
-            if INDEX != 0:
-                i += 1
-                if INDEX == i:
-                    flag = False
+        if not g.share_product(p, 'twitter'):
+            print 'DIED ON INDEX: {}'.format(i)
+            exit(-1)
         else:
-            if not g.share_product(p, 'twitter'):
+            sleep(randrange(3, 5))
+            if not g.share_product(p, 'facebook'):
                 print 'DIED ON INDEX: {}'.format(i)
                 exit(-1)
             else:
                 sleep(randrange(3, 5))
-                if not g.share_product(p, 'facebook'):
+                if not g.share_product(p, 'instagram'):
                     print 'DIED ON INDEX: {}'.format(i)
                     exit(-1)
                 else:
                     sleep(randrange(3, 5))
-                    if not g.share_product(p, 'instagram'):
-                        print 'DIED ON INDEX: {}'.format(i)
-                        exit(-1)
-                    else:
-                        sleep(randrange(3, 5))
-            i += 1
+        i += 1
 print '='*50
 print 'time to run: {} sec'.format(abs(g.start-time()))
