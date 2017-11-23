@@ -23,8 +23,16 @@ class Goat:
             'User-Agent': 'GOAT/1.13.1 (iPhone; iOS 10.3.3; Scale/2.00)',
             'Content-Type': 'application/x-www-form-urlencoded'
         }
+        proxy = raw_input('Enter proxy (Press enter for none) > ')
+        if proxy not in {'', None, ' '}:
+            print 'Updating proxy {}'.format(proxy)
+            self.s.proxies.update({
+                'http': 'http://{}'.format(proxy),
+                'https': 'https://{}'.format(proxy)
+            })
         self.auth_token = ''
         self.products = []
+        self.skip = 0
         print '='*50
         print '\n #GOATSUMMER ENTRY JIG \n BY @EDZART/@573SUPREME \n http://github.com/alxgmpr/goatsummer \n'
         print '='*50
@@ -32,6 +40,10 @@ class Goat:
     def login(self):
         username = raw_input('Enter email > ')
         password = raw_input('Enter password > ')
+        skip = raw_input('Enter skip (if you ran this before and got an error, use this to skip to the index you died on)\n'
+                         'Press enter to continue otherwise > ')
+        if skip not in {'0', None, ''}:
+            self.skip = int(skip)
         url = 'https://www.goat.com/api/v1/users/sign_in'
         data = {
             'user[login]': username,
@@ -135,26 +147,25 @@ if g.login():
         print '='*50
         print g.products
         print '='*50
-    i = 0
     # for p in g.products:
     #     print '\'{}\','.format(p)
     # exit(0)
-    for p in g.products:
-        if not g.share_product(p, 'twitter'):
-            print 'DIED ON INDEX: {}'.format(i)
-            exit(-1)
-        else:
-            sleep(randrange(3, 5))
-            if not g.share_product(p, 'facebook'):
+    for i in range(0, len(g.products)):
+        if i >= g.skip:
+            if not g.share_product(g.products[i], 'twitter'):
                 print 'DIED ON INDEX: {}'.format(i)
                 exit(-1)
             else:
                 sleep(randrange(3, 5))
-                if not g.share_product(p, 'instagram'):
+                if not g.share_product(g.products[i], 'facebook'):
                     print 'DIED ON INDEX: {}'.format(i)
                     exit(-1)
                 else:
                     sleep(randrange(3, 5))
-        i += 1
+                    if not g.share_product(g.products[i], 'instagram'):
+                        print 'DIED ON INDEX: {}'.format(i)
+                        exit(-1)
+                    else:
+                        sleep(randrange(3, 5))
 print '='*50
 print 'time to run: {} sec'.format(abs(g.start-time()))
